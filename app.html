@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>HireMatch.AI — Analyser</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+:root{
+  --bg:#08080f;--surface:#111119;--surface2:#1c1c28;--border:#252535;
+  --accent:#7c6fff;--accent2:#a78bfa;--text:#eeeeff;--muted:#7070a0;
+  --green:#10b981;--yellow:#f59e0b;--red:#f87171;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;}
+
+/* NAV */
+nav{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.nav-logo{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.nav-links{display:flex;align-items:center;gap:8px;}
+.nav-btn{padding:7px 16px;border-radius:8px;font-size:0.82rem;font-weight:500;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all 0.2s;font-family:'Inter',sans-serif;text-decoration:none;}
+.nav-btn:hover{color:var(--text);border-color:var(--accent);}
+.nav-btn.active{background:rgba(124,111,255,0.12);color:var(--accent2);border-color:rgba(124,111,255,0.3);}
+.user-pill{font-size:0.78rem;color:var(--muted);padding:6px 12px;background:var(--surface2);border-radius:20px;border:1px solid var(--border);}
+
+.container{max-width:1080px;margin:0 auto;padding:32px 24px;}
+
+/* PAGE TITLE */
+.page-title{font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:700;margin-bottom:6px;}
+.page-sub{color:var(--muted);font-size:0.9rem;margin-bottom:32px;}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:28px;margin-bottom:20px;}
+.section-label{font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.section-label::before{content:'';width:3px;height:12px;background:var(--accent);border-radius:2px;}
+
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+@media(max-width:680px){.grid-2{grid-template-columns:1fr;}}
+
+/* INPUTS */
+.input-meta{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+input[type=text]{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Inter',sans-serif;font-size:0.875rem;padding:10px 12px;outline:none;transition:border-color 0.2s;}
+input[type=text]:focus{border-color:var(--accent);}
+input[type=text]::placeholder{color:var(--muted);}
+textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Inter',sans-serif;font-size:0.875rem;padding:13px 15px;resize:vertical;min-height:190px;outline:none;transition:border-color 0.2s;line-height:1.6;}
+textarea:focus{border-color:var(--accent);}
+textarea::placeholder{color:var(--muted);}
+
+/* UPLOAD */
+.upload-zone{border:2px dashed var(--border);border-radius:10px;padding:28px 16px;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--surface2);min-height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--accent);background:rgba(124,111,255,0.04);}
+.upload-zone p{color:var(--muted);font-size:0.82rem;}
+.upload-zone strong{color:var(--text);font-size:0.875rem;}
+.upload-zone input{display:none;}
+.upload-success{border-color:rgba(16,185,129,0.4)!important;background:rgba(16,185,129,0.05)!important;}
+
+/* BUTTON */
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:9px;font-family:'Space Grotesk',sans-serif;font-size:0.925rem;font-weight:600;cursor:pointer;border:none;transition:all 0.2s;}
+.btn-primary{background:linear-gradient(135deg,var(--accent),#8b5cf6);color:#fff;width:100%;justify-content:center;padding:15px;font-size:1rem;box-shadow:0 4px 20px rgba(124,111,255,0.28);}
+.btn-primary:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 6px 28px rgba(124,111,255,0.38);}
+.btn-primary:disabled{opacity:0.45;cursor:not-allowed;transform:none;}
+.btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border);font-size:0.82rem;padding:8px 14px;}
+.btn-ghost:hover{border-color:var(--accent);}
+
+/* LOADING */
+.loading{text-align:center;padding:56px 24px;}
+.spinner{width:44px;height:44px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.75s linear infinite;margin:0 auto 16px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.loading-step{color:var(--muted);font-size:0.875rem;margin-top:8px;}
+
+/* RESULTS */
+#results{display:none;}
+
+/* SCORE */
+.score-wrap{display:flex;align-items:center;gap:28px;flex-wrap:wrap;}
+.ring-svg{transform:rotate(-90deg);}
+.score-center-wrap{position:relative;width:130px;height:130px;flex-shrink:0;}
+.score-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.score-num{font-family:'Space Grotesk',sans-serif;font-size:2rem;font-weight:700;line-height:1;}
+.score-sub{font-size:0.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;}
+.score-right h2{font-family:'Space Grotesk',sans-serif;font-size:1.25rem;font-weight:700;margin-bottom:5px;}
+.score-right p{color:var(--muted);font-size:0.875rem;max-width:360px;line-height:1.6;}
+
+/* TAGS */
+.tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px;}
+.tag{font-size:0.75rem;font-weight:500;padding:3px 11px;border-radius:20px;}
+.tag-g{background:rgba(16,185,129,0.12);color:#34d399;border:1px solid rgba(16,185,129,0.22);}
+.tag-r{background:rgba(248,113,113,0.12);color:#f87171;border:1px solid rgba(248,113,113,0.22);}
+.tag-y{background:rgba(245,158,11,0.12);color:#fbbf24;border:1px solid rgba(245,158,11,0.22);}
+.tag-p{background:rgba(124,111,255,0.12);color:var(--accent2);border:1px solid rgba(124,111,255,0.22);}
+
+/* TABS */
+.tabs{display:flex;gap:3px;margin-bottom:22px;}
+.tab{padding:8px 18px;border-radius:8px;font-size:0.83rem;font-weight:500;cursor:pointer;border:1px solid transparent;background:transparent;color:var(--muted);transition:all 0.2s;font-family:'Inter',sans-serif;}
+.tab.active{background:var(--surface2);border-color:var(--border);color:var(--text);}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* IMPROVEMENTS */
+.imp-list{display:flex;flex-direction:column;gap:10px;}
+.imp-item{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:13px 15px;display:flex;gap:11px;align-items:flex-start;}
+.imp-icon{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:0.8rem;flex-shrink:0;}
+.imp-icon.high{background:rgba(248,113,113,0.15);}
+.imp-icon.med{background:rgba(245,158,11,0.15);}
+.imp-icon.low{background:rgba(16,185,129,0.15);}
+.imp-text{font-size:0.875rem;line-height:1.55;}
+.imp-text strong{display:block;font-size:0.72rem;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:2px;}
+.imp-text strong.high{color:var(--red);}
+.imp-text strong.med{color:var(--yellow);}
+.imp-text strong.low{color:var(--green);}
+
+/* SKILL BARS */
+.skill-bars{display:flex;flex-direction:column;gap:13px;}
+.skill-row{}
+.skill-meta{display:flex;justify-content:space-between;font-size:0.82rem;margin-bottom:5px;}
+.skill-name{font-weight:500;}
+.skill-pct{color:var(--muted);}
+.bar-bg{height:5px;background:var(--surface2);border-radius:99px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:99px;transition:width 1s cubic-bezier(.4,0,.2,1);}
+
+/* COVER LETTER */
+.cl-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:22px;font-size:0.875rem;line-height:1.85;white-space:pre-wrap;position:relative;}
+.copy-btn-abs{position:absolute;top:12px;right:12px;}
+
+/* STATUS SELECT */
+.status-row{display:flex;align-items:center;gap:10px;margin-top:16px;}
+.status-row label{font-size:0.82rem;color:var(--muted);}
+select{background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'Inter',sans-serif;font-size:0.82rem;padding:7px 12px;outline:none;cursor:pointer;}
+
+/* SAVE BANNER */
+.save-banner{background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);border-radius:10px;padding:13px 18px;display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px;}
+.save-banner p{font-size:0.875rem;color:var(--green);}
+
+.error-box{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.25);border-radius:9px;padding:13px 16px;color:var(--red);font-size:0.875rem;display:none;margin-top:12px;}
+.divider{border:none;border-top:1px solid var(--border);margin:8px 0;}
+.reset-row{text-align:center;padding:8px 0 24px;}
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-logo">HireMatch.AI</span>
+  <div class="nav-links">
+    <a href="app.html" class="nav-btn active">Analyser</a>
+    <a href="tracker.html" class="nav-btn">My Applications</a>
+    <span class="user-pill" id="userEmail">...</span>
+    <button class="btn-ghost btn" style="font-size:0.78rem;padding:6px 12px;" onclick="signOut()">Sign out</button>
+  </div>
+</nav>
+
+<div class="container">
+  <div id="inputSection">
+    <div class="page-title">Analyse Your Application</div>
+    <p class="page-sub">Paste a job description, upload your resume — get a match score, gaps, and a tailored cover letter.</p>
+
+    <div class="card">
+      <div class="section-label">Job Details (optional but helps)</div>
+      <div class="input-meta">
+        <input type="text" id="jobTitle" placeholder="Job title e.g. Frontend Developer"/>
+        <input type="text" id="company" placeholder="Company name"/>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="section-label">Job Description</div>
+        <textarea id="jobDesc" placeholder="Paste the full job description here — include requirements, responsibilities, tech stack..."></textarea>
+      </div>
+      <div class="card">
+        <div class="section-label">Your Resume</div>
+        <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+          <input type="file" id="fileInput" accept=".pdf,.txt" onchange="handleFile(event)"/>
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:0.4">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="12" y1="18" x2="12" y2="12"/>
+            <line x1="9" y1="15" x2="15" y2="15"/>
+          </svg>
+          <strong>Upload Resume (PDF or TXT)</strong>
+          <p>Click to browse or drag and drop</p>
+        </div>
+        <div style="margin-top:12px;">
+          <div class="section-label" style="margin-bottom:7px;">Or paste resume text</div>
+          <textarea id="resumeText" placeholder="Alternatively paste your resume here..." style="min-height:110px;"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <button class="btn btn-primary" id="analyzeBtn" onclick="analyze()">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Analyse My Application
+      </button>
+      <div class="error-box" id="errorBox"></div>
+    </div>
+  </div>
+
+  <!-- LOADING -->
+  <div class="card loading" id="loadingSection" style="display:none;">
+    <div class="spinner"></div>
+    <p style="color:var(--muted);">Analysing your application...</p>
+    <p class="loading-step" id="loadingStep">Reading resume and job description</p>
+  </div>
+
+  <!-- RESULTS -->
+  <div id="results">
+    <div class="save-banner" id="saveBanner" style="display:none;">
+      <p>✓ Saved to your applications tracker</p>
+      <a href="tracker.html" class="btn btn-ghost" style="font-size:0.8rem;padding:7px 14px;">View all applications →</a>
+    </div>
+
+    <!-- SCORE CARD -->
+    <div class="card">
+      <div class="section-label">Match Score</div>
+      <div class="score-wrap">
+        <div class="score-center-wrap">
+          <svg class="ring-svg" width="130" height="130" viewBox="0 0 130 130">
+            <circle cx="65" cy="65" r="54" fill="none" stroke="var(--surface2)" stroke-width="9"/>
+            <circle cx="65" cy="65" r="54" fill="none" stroke="url(#sg)" stroke-width="9"
+              stroke-linecap="round" stroke-dasharray="339.3" id="scoreCircle" stroke-dashoffset="339.3"/>
+            <defs>
+              <linearGradient id="sg" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#7c6fff"/>
+                <stop offset="100%" stop-color="#a78bfa"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <div class="score-center">
+            <div class="score-num" id="scoreNum">0%</div>
+            <div class="score-sub">Match</div>
+          </div>
+        </div>
+        <div class="score-right">
+          <h2 id="scoreTitle"></h2>
+          <p id="scoreDesc"></p>
+          <div class="tags" id="scoreTags"></div>
+          <div class="status-row">
+            <label>Application status:</label>
+            <select id="statusSelect" onchange="updateStatus()">
+              <option value="analysed">Analysed</option>
+              <option value="applied">Applied</option>
+              <option value="interviewing">Interviewing</option>
+              <option value="offered">Offered</option>
+              <option value="rejected">Rejected</option>
+              <option value="withdrawn">Withdrawn</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DETAIL TABS -->
+    <div class="card">
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('gaps')">Skills Gap</button>
+        <button class="tab" onclick="switchTab('improve')">Improvements</button>
+        <button class="tab" onclick="switchTab('rewriter')">Resume Rewriter</button>
+        <button class="tab" onclick="switchTab('cover')">Cover Letter</button>
+      </div>
+
+      <!-- GAPS -->
+      <div class="tab-panel active" id="tab-gaps">
+        <div class="grid-2" style="gap:28px;">
+          <div>
+            <div class="section-label">Found in Your Resume</div>
+            <div class="tags" id="foundKeywords"></div>
+          </div>
+          <div>
+            <div class="section-label">Missing Keywords</div>
+            <div class="tags" id="missingKeywords"></div>
+          </div>
+        </div>
+        <hr class="divider" style="margin:22px 0;">
+        <div class="section-label">Skill Alignment</div>
+        <div class="skill-bars" id="skillBars"></div>
+      </div>
+
+      <!-- IMPROVEMENTS -->
+      <div class="tab-panel" id="tab-improve">
+        <div class="section-label">Specific Actions to Improve Your Application</div>
+        <div class="imp-list" id="impList"></div>
+      </div>
+
+      <!-- RESUME REWRITER -->
+      <div class="tab-panel" id="tab-rewriter">
+        <div class="section-label">Rewrite a Bullet Point</div>
+        <p style="color:var(--muted);font-size:0.85rem;margin-bottom:14px;">Paste any bullet point from your resume — get a rewritten version optimised for this specific job.</p>
+        <textarea id="bulletInput" placeholder='e.g. "Managed a team of developers and shipped features"' style="min-height:90px;margin-bottom:12px;"></textarea>
+        <button class="btn btn-primary" style="max-width:260px;" onclick="rewriteBullet()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          Rewrite for This Job
+        </button>
+        <div id="rewriteLoading" style="display:none;color:var(--muted);font-size:0.85rem;margin-top:14px;">Rewriting...</div>
+        <div id="rewriteResult" style="display:none;margin-top:16px;">
+          <div class="section-label" style="margin-bottom:8px;">Rewritten Version</div>
+          <div class="cl-box" id="rewriteText" style="min-height:60px;"></div>
+          <p style="color:var(--muted);font-size:0.78rem;margin-top:8px;">Always review and personalise before using.</p>
+        </div>
+      </div>
+
+      <!-- COVER LETTER -->
+      <div class="tab-panel" id="tab-cover">
+        <div class="section-label">AI-Generated Cover Letter</div>
+        <p style="color:var(--muted);font-size:0.82rem;margin-bottom:14px;">Tailored to this job. Edit before sending.</p>
+        <div class="cl-box">
+          <button class="btn btn-ghost copy-btn-abs" onclick="copyCL()">Copy</button>
+          <div id="coverLetterText"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="reset-row">
+      <button class="btn btn-ghost" onclick="reset()">← Analyse another application</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ⚠️ REPLACE THESE
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let resumeContent = '';
+let currentAppId = null;
+let currentResult = null;
+let currentJD = '';
+
+// Auth guard
+sb.auth.getSession().then(({ data }) => {
+  if (!data.session) window.location.href = 'index.html';
+  else document.getElementById('userEmail').textContent = data.session.user.email;
+});
+
+async function signOut() {
+  await sb.auth.signOut();
+  window.location.href = 'index.html';
+}
+
+// Drag and drop
+const zone = document.getElementById('uploadZone');
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
+zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag'); if (e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]); });
+
+async function handleFile(e) { if (e.target.files[0]) processFile(e.target.files[0]); }
+
+async function processFile(file) {
+  zone.innerHTML = `<p style="color:var(--muted)">Reading ${file.name}...</p>`;
+  try {
+    if (file.name.endsWith('.pdf')) {
+      const ab = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: ab }).promise;
+      let text = '';
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const c = await page.getTextContent();
+        text += c.items.map(s => s.str).join(' ') + '\n';
+      }
+      resumeContent = text;
+    } else {
+      resumeContent = await file.text();
+    }
+    zone.classList.add('upload-success');
+    zone.innerHTML = `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><strong style="color:var(--green)">${file.name}</strong><p style="color:var(--green)">Loaded ✓</p>`;
+  } catch { zone.innerHTML = `<p style="color:var(--red)">Could not read file — paste text below.</p>`; }
+}
+
+async function analyze() {
+  const jd = document.getElementById('jobDesc').value.trim();
+  const pastedResume = document.getElementById('resumeText').value.trim();
+  const resume = resumeContent || pastedResume;
+  const errorBox = document.getElementById('errorBox');
+  errorBox.style.display = 'none';
+  if (!jd) { showError('Please paste a job description.'); return; }
+  if (!resume) { showError('Please upload your resume or paste the text.'); return; }
+
+  currentJD = jd;
+  document.getElementById('inputSection').style.display = 'none';
+  document.getElementById('loadingSection').style.display = 'block';
+
+  const steps = ['Reading resume and job description...','Identifying key requirements...','Scoring keyword alignment...','Generating gap analysis...','Writing cover letter...','Saving to your tracker...'];
+  let si = 0;
+  const stepEl = document.getElementById('loadingStep');
+  const iv = setInterval(() => { if (si < steps.length-1) stepEl.textContent = steps[++si]; }, 2200);
+
+  try {
+    const prompt = `You are an expert career coach and ATS specialist. Analyse this resume against the job description.
+
+JOB DESCRIPTION:
+${jd}
+
+RESUME:
+${resume}
+
+Respond ONLY with valid JSON (no markdown, no preamble):
+{
+  "score": <0-100>,
+  "scoreTitle": "<verdict>",
+  "scoreDesc": "<2 sentences>",
+  "strengths": ["<keyword>", ...],
+  "missing": ["<keyword>", ...],
+  "skills": [{"name":"<category>","match":<0-100>,"note":"<brief>"},...],
+  "improvements": [{"priority":"high|med|low","title":"<short>","detail":"<specific actionable advice>"},...],
+  "coverLetter": "<full tailored cover letter, 3-4 paragraphs, referencing specific details from both resume and JD>"
+}
+Rules: strengths 5-8 items, missing 5-8 items, skills 4-6 items, improvements 4-6 items high→low priority.`;
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] })
+    });
+    const data = await res.json();
+    clearInterval(iv);
+    if (!res.ok) throw new Error(data.error?.message || 'API error');
+    const raw = data.content[0].text.trim();
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error('Could not parse response');
+    const result = JSON.parse(match[0]);
+    currentResult = result;
+
+    // Save to Supabase
+    const { data: { user } } = await sb.auth.getUser();
+    const { data: saved } = await sb.from('applications').insert({
+      user_id: user.id,
+      job_title: document.getElementById('jobTitle').value.trim() || null,
+      company: document.getElementById('company').value.trim() || null,
+      job_description: jd,
+      resume_text: resume,
+      score: result.score,
+      score_title: result.scoreTitle,
+      score_desc: result.scoreDesc,
+      strengths: result.strengths,
+      missing_keywords: result.missing,
+      skills: result.skills,
+      improvements: result.improvements,
+      cover_letter: result.coverLetter,
+      status: 'analysed'
+    }).select().single();
+    if (saved) currentAppId = saved.id;
+
+    displayResults(result);
+    document.getElementById('saveBanner').style.display = 'flex';
+  } catch(err) {
+    clearInterval(iv);
+    document.getElementById('loadingSection').style.display = 'none';
+    document.getElementById('inputSection').style.display = 'block';
+    showError('Error: ' + err.message);
+  }
+}
+
+function displayResults(r) {
+  document.getElementById('loadingSection').style.display = 'none';
+  document.getElementById('results').style.display = 'block';
+
+  const score = Math.min(100, Math.max(0, r.score));
+  const circ = 339.3;
+  setTimeout(() => {
+    document.getElementById('scoreCircle').style.strokeDashoffset = circ - (score/100)*circ;
+    document.getElementById('scoreCircle').style.transition = 'stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1)';
+  }, 100);
+  let cur = 0;
+  const el = document.getElementById('scoreNum');
+  const iv = setInterval(() => { cur = Math.min(score, cur+2); el.textContent = cur+'%'; el.style.color = score>=70?'var(--green)':score>=50?'var(--yellow)':'var(--red)'; if(cur>=score) clearInterval(iv); }, 18);
+
+  document.getElementById('scoreTitle').textContent = r.scoreTitle;
+  document.getElementById('scoreDesc').textContent = r.scoreDesc;
+  const tc = score>=70?'tag-g':score>=50?'tag-y':'tag-r';
+  document.getElementById('scoreTags').innerHTML = `<span class="tag ${tc}">${score>=70?'✓ Strong candidate':score>=50?'⚡ Competitive with improvements':'⚠ Significant gaps'}</span>`;
+
+  document.getElementById('foundKeywords').innerHTML = (r.strengths||[]).map(k=>`<span class="tag tag-g">${k}</span>`).join('');
+  document.getElementById('missingKeywords').innerHTML = (r.missing||[]).map(k=>`<span class="tag tag-r">${k}</span>`).join('');
+
+  document.getElementById('skillBars').innerHTML = (r.skills||[]).map(s=>{
+    const c = s.match>=70?'#10b981':s.match>=50?'#f59e0b':'#f87171';
+    return `<div class="skill-row"><div class="skill-meta"><span class="skill-name">${s.name}</span><span class="skill-pct">${s.match}% — ${s.note}</span></div><div class="bar-bg"><div class="bar-fill" style="width:0%;background:${c}" data-t="${s.match}"></div></div></div>`;
+  }).join('');
+  setTimeout(() => document.querySelectorAll('.bar-fill').forEach(b => b.style.width = b.dataset.t+'%'), 150);
+
+  const icons = { high:'🔴', med:'🟡', low:'🟢' };
+  document.getElementById('impList').innerHTML = (r.improvements||[]).map(i=>`
+    <div class="imp-item"><div class="imp-icon ${i.priority}">${icons[i.priority]||'•'}</div>
+    <div class="imp-text"><strong class="${i.priority}">${i.priority.toUpperCase()} — ${i.title}</strong>${i.detail}</div></div>`).join('');
+
+  document.getElementById('coverLetterText').textContent = r.coverLetter || '';
+}
+
+async function rewriteBullet() {
+  const bullet = document.getElementById('bulletInput').value.trim();
+  if (!bullet) return;
+  document.getElementById('rewriteLoading').style.display = 'block';
+  document.getElementById('rewriteResult').style.display = 'none';
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514', max_tokens: 1000,
+        messages: [{ role: 'user', content: `You are an expert resume writer. Rewrite this resume bullet point to better match the job description. Make it more specific, quantified where possible, and include relevant keywords from the JD.
+
+ORIGINAL BULLET: ${bullet}
+JOB DESCRIPTION: ${currentJD.slice(0, 1000)}
+
+Return ONLY the rewritten bullet point, nothing else. Keep it to 1-2 lines.` }]
+      })
+    });
+    const data = await res.json();
+    document.getElementById('rewriteLoading').style.display = 'none';
+    document.getElementById('rewriteResult').style.display = 'block';
+    document.getElementById('rewriteText').textContent = data.content[0].text.trim();
+  } catch { document.getElementById('rewriteLoading').style.display = 'none'; }
+}
+
+async function updateStatus() {
+  if (!currentAppId) return;
+  const status = document.getElementById('statusSelect').value;
+  await sb.from('applications').update({ status }).eq('id', currentAppId);
+}
+
+function switchTab(name) {
+  const names = ['gaps','improve','rewriter','cover'];
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', names[i]===name));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id==='tab-'+name));
+}
+
+function copyCL() {
+  navigator.clipboard.writeText(document.getElementById('coverLetterText').textContent).then(() => {
+    const b = document.querySelector('.copy-btn-abs'); b.textContent='Copied!'; setTimeout(()=>b.textContent='Copy',2000);
+  });
+}
+
+function reset() {
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('saveBanner').style.display = 'none';
+  document.getElementById('inputSection').style.display = 'block';
+  resumeContent = ''; currentAppId = null; currentResult = null; currentJD = '';
+  document.getElementById('jobDesc').value = '';
+  document.getElementById('resumeText').value = '';
+  document.getElementById('jobTitle').value = '';
+  document.getElementById('company').value = '';
+  const z = document.getElementById('uploadZone');
+  z.classList.remove('upload-success');
+  z.innerHTML = `<input type="file" id="fileInput" accept=".pdf,.txt" onchange="handleFile(event)"/><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="opacity:0.4"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg><strong>Upload Resume (PDF or TXT)</strong><p>Click to browse or drag and drop</p>`;
+}
+
+function showError(msg) { const e = document.getElementById('errorBox'); e.textContent = msg; e.style.display = 'block'; }
+</script>
+</body>
+</html>

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>HireMatch.AI — My Applications</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+:root{
+  --bg:#08080f;--surface:#111119;--surface2:#1c1c28;--border:#252535;
+  --accent:#7c6fff;--accent2:#a78bfa;--text:#eeeeff;--muted:#7070a0;
+  --green:#10b981;--yellow:#f59e0b;--red:#f87171;--blue:#38bdf8;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;}
+
+nav{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 32px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.nav-logo{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.nav-links{display:flex;align-items:center;gap:8px;}
+.nav-btn{padding:7px 16px;border-radius:8px;font-size:0.82rem;font-weight:500;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all 0.2s;font-family:'Inter',sans-serif;text-decoration:none;}
+.nav-btn:hover{color:var(--text);border-color:var(--accent);}
+.nav-btn.active{background:rgba(124,111,255,0.12);color:var(--accent2);border-color:rgba(124,111,255,0.3);}
+.user-pill{font-size:0.78rem;color:var(--muted);padding:6px 12px;background:var(--surface2);border-radius:20px;border:1px solid var(--border);}
+.btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border);font-size:0.78rem;padding:6px 12px;border-radius:8px;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.2s;}
+.btn-ghost:hover{border-color:var(--accent);}
+
+.container{max-width:1100px;margin:0 auto;padding:32px 24px;}
+.page-title{font-family:'Space Grotesk',sans-serif;font-size:1.6rem;font-weight:700;margin-bottom:6px;}
+.page-sub{color:var(--muted);font-size:0.875rem;margin-bottom:32px;}
+
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:28px;}
+@media(max-width:700px){.stats-row{grid-template-columns:1fr 1fr;}}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;}
+.stat-val{font-family:'Space Grotesk',sans-serif;font-size:1.9rem;font-weight:700;line-height:1;margin-bottom:4px;}
+.stat-label{font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;}
+.stat-sub{font-size:0.78rem;color:var(--muted);margin-top:6px;}
+
+/* INSIGHT CARD */
+.insight-card{background:var(--surface);border:1px solid rgba(124,111,255,0.25);border-radius:12px;padding:22px;margin-bottom:28px;background:linear-gradient(135deg,rgba(124,111,255,0.06),rgba(167,139,250,0.04));}
+.insight-title{font-family:'Space Grotesk',sans-serif;font-size:0.78rem;font-weight:600;text-transform:uppercase;letter-spacing:0.1em;color:var(--accent2);margin-bottom:14px;}
+.insights-list{display:flex;flex-direction:column;gap:10px;}
+.insight-item{display:flex;align-items:flex-start;gap:10px;font-size:0.875rem;line-height:1.55;}
+.insight-icon{font-size:1rem;flex-shrink:0;margin-top:1px;}
+
+/* FILTER ROW */
+.filter-row{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
+.filter-btn{padding:6px 14px;border-radius:20px;font-size:0.78rem;font-weight:500;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all 0.2s;font-family:'Inter',sans-serif;}
+.filter-btn:hover,.filter-btn.active{background:rgba(124,111,255,0.12);color:var(--accent2);border-color:rgba(124,111,255,0.3);}
+
+/* TABLE */
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+table{width:100%;border-collapse:collapse;}
+thead tr{background:var(--surface2);}
+th{padding:12px 16px;text-align:left;font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);border-bottom:1px solid var(--border);}
+td{padding:14px 16px;font-size:0.875rem;border-bottom:1px solid var(--border);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(255,255,255,0.02);}
+.company-name{font-weight:600;color:var(--text);}
+.job-title-cell{color:var(--muted);font-size:0.82rem;margin-top:2px;}
+
+.score-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:0.78rem;font-weight:600;}
+.score-high{background:rgba(16,185,129,0.12);color:#34d399;border:1px solid rgba(16,185,129,0.22);}
+.score-mid{background:rgba(245,158,11,0.12);color:#fbbf24;border:1px solid rgba(245,158,11,0.22);}
+.score-low{background:rgba(248,113,113,0.12);color:#f87171;border:1px solid rgba(248,113,113,0.22);}
+
+.status-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:0.73rem;font-weight:500;}
+.s-analysed{background:rgba(124,111,255,0.12);color:var(--accent2);}
+.s-applied{background:rgba(56,189,248,0.12);color:#38bdf8;}
+.s-interviewing{background:rgba(245,158,11,0.12);color:#fbbf24;}
+.s-offered{background:rgba(16,185,129,0.12);color:#34d399;}
+.s-rejected{background:rgba(248,113,113,0.12);color:#f87171;}
+.s-withdrawn{background:rgba(120,120,160,0.12);color:var(--muted);}
+
+.action-btn{padding:5px 11px;border-radius:7px;font-size:0.75rem;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--muted);transition:all 0.2s;font-family:'Inter',sans-serif;}
+.action-btn:hover{color:var(--text);border-color:var(--accent);}
+.action-btn.del:hover{color:var(--red);border-color:var(--red);}
+
+.empty-state{text-align:center;padding:64px 24px;}
+.empty-state h3{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;margin-bottom:8px;}
+.empty-state p{color:var(--muted);font-size:0.875rem;margin-bottom:20px;}
+.btn-primary-sm{padding:10px 22px;border-radius:9px;font-family:'Space Grotesk',sans-serif;font-size:0.875rem;font-weight:600;cursor:pointer;border:none;background:linear-gradient(135deg,var(--accent),#8b5cf6);color:#fff;text-decoration:none;display:inline-block;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:none;align-items:center;justify-content:center;padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;max-width:680px;width:100%;max-height:85vh;overflow-y:auto;}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;}
+.modal-title{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;}
+.modal-close{background:transparent;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer;padding:4px 8px;border-radius:6px;}
+.modal-close:hover{color:var(--text);}
+.modal-section{margin-bottom:20px;}
+.modal-label{font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:10px;}
+.tags{display:flex;flex-wrap:wrap;gap:7px;}
+.tag{font-size:0.75rem;font-weight:500;padding:3px 11px;border-radius:20px;}
+.tag-g{background:rgba(16,185,129,0.12);color:#34d399;border:1px solid rgba(16,185,129,0.22);}
+.tag-r{background:rgba(248,113,113,0.12);color:#f87171;border:1px solid rgba(248,113,113,0.22);}
+.cl-box{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:18px;font-size:0.85rem;line-height:1.8;white-space:pre-wrap;}
+
+.loading-row{text-align:center;padding:48px;color:var(--muted);}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.75s linear infinite;margin:0 auto 12px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-logo">HireMatch.AI</span>
+  <div class="nav-links">
+    <a href="app.html" class="nav-btn">Analyser</a>
+    <a href="tracker.html" class="nav-btn active">My Applications</a>
+    <span class="user-pill" id="userEmail">...</span>
+    <button class="btn-ghost" onclick="signOut()">Sign out</button>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="page-title">My Applications</div>
+  <p class="page-sub">Track every application and see patterns in your job search.</p>
+
+  <div id="loadingRow" class="loading-row">
+    <div class="spinner"></div>
+    <p>Loading your applications...</p>
+  </div>
+
+  <div id="dashContent" style="display:none;">
+    <!-- STATS -->
+    <div class="stats-row" id="statsRow"></div>
+
+    <!-- INTELLIGENCE INSIGHT -->
+    <div class="insight-card" id="insightCard" style="display:none;">
+      <div class="insight-title">⚡ Your Job Search Intelligence</div>
+      <div class="insights-list" id="insightsList"></div>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="filter-row">
+      <span style="font-size:0.8rem;color:var(--muted);margin-right:4px;">Filter:</span>
+      <button class="filter-btn active" onclick="filterApps('all', this)">All</button>
+      <button class="filter-btn" onclick="filterApps('analysed', this)">Analysed</button>
+      <button class="filter-btn" onclick="filterApps('applied', this)">Applied</button>
+      <button class="filter-btn" onclick="filterApps('interviewing', this)">Interviewing</button>
+      <button class="filter-btn" onclick="filterApps('offered', this)">Offered</button>
+      <button class="filter-btn" onclick="filterApps('rejected', this)">Rejected</button>
+    </div>
+
+    <!-- TABLE -->
+    <div id="tableWrap"></div>
+  </div>
+</div>
+
+<!-- DETAIL MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Application Detail</div>
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+// ⚠️ REPLACE THESE
+const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let allApps = [];
+let currentFilter = 'all';
+
+sb.auth.getSession().then(({ data }) => {
+  if (!data.session) window.location.href = 'index.html';
+  else { document.getElementById('userEmail').textContent = data.session.user.email; loadApps(); }
+});
+
+async function signOut() { await sb.auth.signOut(); window.location.href = 'index.html'; }
+
+async function loadApps() {
+  const { data, error } = await sb.from('applications').select('*').order('created_at', { ascending: false });
+  document.getElementById('loadingRow').style.display = 'none';
+  document.getElementById('dashContent').style.display = 'block';
+  if (error || !data) { allApps = []; } else { allApps = data; }
+  renderStats();
+  renderInsights();
+  renderTable(currentFilter);
+}
+
+function renderStats() {
+  const total = allApps.length;
+  const avgScore = total ? Math.round(allApps.reduce((s,a)=>s+(a.score||0),0)/total) : 0;
+  const interviews = allApps.filter(a=>a.status==='interviewing'||a.status==='offered').length;
+  const offers = allApps.filter(a=>a.status==='offered').length;
+  const responseRate = total ? Math.round((allApps.filter(a=>['interviewing','offered','rejected'].includes(a.status)).length/total)*100) : 0;
+
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-card"><div class="stat-val" style="color:var(--accent2)">${total}</div><div class="stat-label">Total Applications</div><div class="stat-sub">All time</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:${avgScore>=70?'var(--green)':avgScore>=50?'var(--yellow)':'var(--red)'}">${avgScore}%</div><div class="stat-label">Avg Match Score</div><div class="stat-sub">Across all applications</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--yellow)">${interviews}</div><div class="stat-label">Interviews</div><div class="stat-sub">${offers} offer${offers!==1?'s':''} received</div></div>
+    <div class="stat-card"><div class="stat-val" style="color:var(--blue)">${responseRate}%</div><div class="stat-label">Response Rate</div><div class="stat-sub">Of tracked applications</div></div>`;
+}
+
+function renderInsights() {
+  if (allApps.length < 2) return;
+  const insights = [];
+
+  // Avg score insight
+  const avgScore = Math.round(allApps.reduce((s,a)=>s+(a.score||0),0)/allApps.length);
+  if (avgScore < 60) insights.push({ icon:'💡', text:`Your average match score is <strong>${avgScore}%</strong> — roles where you score under 60% are unlikely to pass ATS screening. Target roles more closely aligned with your current skills, or close the skill gap first.` });
+  else if (avgScore >= 75) insights.push({ icon:'🔥', text:`Strong average match score of <strong>${avgScore}%</strong>. Your profile aligns well with the roles you're targeting.` });
+
+  // Missing keywords pattern
+  const allMissing = allApps.flatMap(a => a.missing_keywords || []);
+  const freq = {};
+  allMissing.forEach(k => freq[k] = (freq[k]||0)+1);
+  const top = Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  if (top.length > 0) insights.push({ icon:'📌', text:`These keywords keep appearing in your gaps: <strong>${top.map(([k])=>k).join(', ')}</strong>. Learning or adding these to your resume could unlock multiple roles at once.` });
+
+  // High score but rejected
+  const highRejected = allApps.filter(a=>a.status==='rejected'&&(a.score||0)>=70);
+  if (highRejected.length > 0) insights.push({ icon:'🤔', text:`You were rejected from <strong>${highRejected.length}</strong> role${highRejected.length>1?'s':''} despite a high match score. This suggests the gap may be in your cover letter, application timing, or interview performance — not your resume.` });
+
+  // Interview conversion
+  const applied = allApps.filter(a=>a.status!=='analysed').length;
+  const interviewed = allApps.filter(a=>['interviewing','offered'].includes(a.status)).length;
+  if (applied >= 3) {
+    const rate = Math.round((interviewed/applied)*100);
+    if (rate < 15) insights.push({ icon:'📉', text:`Your interview conversion rate is <strong>${rate}%</strong>. Consider networking more — a referral dramatically improves callback rates over cold applications.` });
+    else if (rate >= 30) insights.push({ icon:'🚀', text:`Strong interview conversion rate of <strong>${rate}%</strong>. Your applications are landing well.` });
+  }
+
+  if (insights.length === 0) return;
+  document.getElementById('insightCard').style.display = 'block';
+  document.getElementById('insightsList').innerHTML = insights.map(i=>
+    `<div class="insight-item"><span class="insight-icon">${i.icon}</span><span>${i.text}</span></div>`
+  ).join('');
+}
+
+function renderTable(filter) {
+  const apps = filter === 'all' ? allApps : allApps.filter(a => a.status === filter);
+  const wrap = document.getElementById('tableWrap');
+
+  if (apps.length === 0) {
+    wrap.innerHTML = `<div class="empty-state">
+      <h3>${filter==='all'?'No applications yet':'No '+filter+' applications'}</h3>
+      <p>${filter==='all'?'Run your first analysis to start tracking your job search.':'No applications with this status yet.'}</p>
+      ${filter==='all'?`<a href="app.html" class="btn-primary-sm">Analyse an application →</a>`:''}
+    </div>`; return;
+  }
+
+  const scoreClass = s => s>=70?'score-high':s>=50?'score-mid':'score-low';
+  const statusClass = s => 's-'+s;
+  const fmt = d => new Date(d).toLocaleDateString('en-AU',{day:'numeric',month:'short'});
+
+  wrap.innerHTML = `<div class="table-wrap"><table>
+    <thead><tr>
+      <th>Role</th><th>Score</th><th>Status</th><th>Missing Keywords</th><th>Date</th><th></th>
+    </tr></thead>
+    <tbody>${apps.map(a=>`
+      <tr>
+        <td><div class="company-name">${a.company||'—'}</div><div class="job-title-cell">${a.job_title||'Untitled role'}</div></td>
+        <td><span class="score-pill ${scoreClass(a.score||0)}">${a.score||0}%</span></td>
+        <td><span class="status-badge ${statusClass(a.status)}">${a.status}</span></td>
+        <td style="max-width:200px;">
+          <div style="display:flex;flex-wrap:wrap;gap:4px;">
+            ${(a.missing_keywords||[]).slice(0,3).map(k=>`<span style="font-size:0.7rem;padding:2px 8px;border-radius:20px;background:rgba(248,113,113,0.1);color:#f87171;border:1px solid rgba(248,113,113,0.2);">${k}</span>`).join('')}
+            ${(a.missing_keywords||[]).length>3?`<span style="font-size:0.7rem;color:var(--muted)">+${(a.missing_keywords||[]).length-3} more</span>`:''}
+          </div>
+        </td>
+        <td style="color:var(--muted);font-size:0.8rem;">${fmt(a.created_at)}</td>
+        <td>
+          <div style="display:flex;gap:6px;">
+            <button class="action-btn" onclick="viewApp('${a.id}')">View</button>
+            <button class="action-btn del" onclick="deleteApp('${a.id}')">Delete</button>
+          </div>
+        </td>
+      </tr>`).join('')}
+    </tbody>
+  </table></div>`;
+}
+
+function filterApps(filter, btn) {
+  currentFilter = filter;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTable(filter);
+}
+
+function viewApp(id) {
+  const a = allApps.find(x=>x.id===id);
+  if (!a) return;
+  document.getElementById('modalTitle').textContent = `${a.company||'Unknown company'} — ${a.job_title||'Untitled role'}`;
+  const scoreClass = a.score>=70?'#10b981':a.score>=50?'#f59e0b':'#f87171';
+  document.getElementById('modalBody').innerHTML = `
+    <div class="modal-section">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px;">
+        <div style="font-family:Space Grotesk,sans-serif;font-size:2.2rem;font-weight:700;color:${scoreClass}">${a.score}%</div>
+        <div><div style="font-weight:600">${a.scoreTitle||''}</div><div style="color:var(--muted);font-size:0.85rem">${a.score_desc||''}</div></div>
+      </div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-label">Keywords Found</div>
+      <div class="tags">${(a.strengths||[]).map(k=>`<span class="tag tag-g">${k}</span>`).join('')}</div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-label">Missing Keywords</div>
+      <div class="tags">${(a.missing_keywords||[]).map(k=>`<span class="tag tag-r">${k}</span>`).join('')}</div>
+    </div>
+    <div class="modal-section">
+      <div class="modal-label">Top Improvements</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        ${(a.improvements||[]).slice(0,3).map(i=>`<div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:0.85rem;"><strong style="color:${i.priority==='high'?'var(--red)':i.priority==='med'?'var(--yellow)':'var(--green)';font-size:0.72rem;text-transform:uppercase;">${i.priority.toUpperCase()} — ${i.title}</strong><br/>${i.detail}</div>`).join('')}
+      </div>
+    </div>
+    ${a.cover_letter?`<div class="modal-section"><div class="modal-label">Cover Letter</div><div class="cl-box">${a.cover_letter}</div></div>`:''}
+    <div style="margin-top:16px;">
+      <label style="font-size:0.8rem;color:var(--muted);margin-right:8px;">Update status:</label>
+      <select onchange="updateAppStatus('${a.id}',this.value)" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:Inter,sans-serif;font-size:0.82rem;padding:7px 12px;outline:none;">
+        ${['analysed','applied','interviewing','offered','rejected','withdrawn'].map(s=>`<option value="${s}" ${a.status===s?'selected':''}>${s.charAt(0).toUpperCase()+s.slice(1)}</option>`).join('')}
+      </select>
+    </div>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+async function updateAppStatus(id, status) {
+  await sb.from('applications').update({ status }).eq('id', id);
+  const app = allApps.find(a=>a.id===id);
+  if (app) app.status = status;
+  renderStats(); renderInsights(); renderTable(currentFilter);
+}
+
+async function deleteApp(id) {
+  if (!confirm('Delete this application? This cannot be undone.')) return;
+  await sb.from('applications').delete().eq('id', id);
+  allApps = allApps.filter(a=>a.id!==id);
+  renderStats(); renderInsights(); renderTable(currentFilter);
+}
+
+function closeModal(e) { if (e.target===document.getElementById('modalOverlay')) closeModalDirect(); }
+function closeModalDirect() { document.getElementById('modalOverlay').classList.remove('open'); }
+</script>
+</body>
+</html>
