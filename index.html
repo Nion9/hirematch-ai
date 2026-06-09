@@ -50,19 +50,12 @@ input::placeholder{color:var(--muted);}
 .divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--muted);font-size:0.8rem;}
 .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border);}
 
-.config-note{background:rgba(124,111,255,0.08);border:1px solid rgba(124,111,255,0.2);border-radius:10px;padding:14px;margin-bottom:24px;font-size:0.82rem;color:var(--muted);line-height:1.6;}
-.config-note strong{color:var(--accent2);}
-.config-note code{background:rgba(255,255,255,0.07);padding:1px 6px;border-radius:4px;font-size:0.8rem;color:var(--text);}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="logo">HireMatch.AI</div>
   <p class="tagline">Know exactly why you're not getting interviews</p>
 
-  <div class="config-note">
-    <strong>Setup required:</strong> Replace <code>https://gsacplkwwpmsyyiwgtuv.supabase.co</code> and <code>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdzYWNwbGt3d3Btc3l5aXdndHV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMTYxNTksImV4cCI6MjA5NjU5MjE1OX0.DhvnHMw5E458z7MXiPEs-4K-pN9Mi-nsXkDy9cfVdVc</code> in the <code>&lt;script&gt;</code> at the bottom of this file with your Supabase project credentials.
-  </div>
 
   <div class="card">
     <div class="tabs">
@@ -103,8 +96,8 @@ input::placeholder{color:var(--muted);}
 
 <script>
 // ⚠️ REPLACE THESE WITH YOUR SUPABASE PROJECT CREDENTIALS
-const SUPABASE_URL = https://gsacplkwwpmsyyiwgtuv.supabase.co;
-const SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdzYWNwbGt3d3Btc3l5aXdndHV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMTYxNTksImV4cCI6MjA5NjU5MjE1OX0.DhvnHMw5E458z7MXiPEs-4K-pN9Mi-nsXkDy9cfVdVc;
+const SUPABASE_URL = 'https://gsacplkwwpmsyyiwgtuv.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdzYWNwbGt3d3Btc3l5aXdndHV2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMTYxNTksImV4cCI6MjA5NjU5MjE1OX0.DhvnHMw5E458z7MXiPEs-4K-pN9Mi-nsXkDy9cfVdVc';
 
 const { createClient } = supabase;
 const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
