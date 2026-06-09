@@ -415,12 +415,12 @@ Rules: strengths 5-8 items, missing 5-8 items, skills 4-6 items, improvements 4-
     const res = await fetch('/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] })
+      body: JSON.stringify({ prompt })
     });
     const data = await res.json();
     clearInterval(iv);
-    if (!res.ok) throw new Error(data.error?.message || 'API error');
-    const raw = data.content[0].text.trim();
+    if (!res.ok) throw new Error(data.error || 'API error');
+    const raw = data.text.trim();
     const match = raw.match(/\{[\s\S]*\}/);
     if (!match) throw new Error('Could not parse response');
     const result = JSON.parse(match[0]);
@@ -503,19 +503,18 @@ async function rewriteBullet() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514', max_tokens: 1000,
-        messages: [{ role: 'user', content: `You are an expert resume writer. Rewrite this resume bullet point to better match the job description. Make it more specific, quantified where possible, and include relevant keywords from the JD.
+        prompt: `You are an expert resume writer. Rewrite this resume bullet point to better match the job description. Make it more specific, quantified where possible, and include relevant keywords from the JD.
 
 ORIGINAL BULLET: ${bullet}
 JOB DESCRIPTION: ${currentJD.slice(0, 1000)}
 
-Return ONLY the rewritten bullet point, nothing else. Keep it to 1-2 lines.` }]
+Return ONLY the rewritten bullet point, nothing else. Keep it to 1-2 lines.`
       })
     });
     const data = await res.json();
     document.getElementById('rewriteLoading').style.display = 'none';
     document.getElementById('rewriteResult').style.display = 'block';
-    document.getElementById('rewriteText').textContent = data.content[0].text.trim();
+    document.getElementById('rewriteText').textContent = data.text.trim();
   } catch { document.getElementById('rewriteLoading').style.display = 'none'; }
 }
 
