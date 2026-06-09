@@ -412,7 +412,7 @@ Respond ONLY with valid JSON (no markdown, no preamble):
 }
 Rules: strengths 5-8 items, missing 5-8 items, skills 4-6 items, improvements 4-6 items high→low priority.`;
 
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] })
@@ -499,7 +499,7 @@ async function rewriteBullet() {
   document.getElementById('rewriteResult').style.display = 'none';
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
