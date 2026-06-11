@@ -1,61 +1,174 @@
-```
-██╗  ██╗██╗██████╗ ███████╗███╗   ███╗ █████╗ ████████╗ ██████╗██╗  ██╗
-██║  ██║██║██╔══██╗██╔════╝████╗ ████║██╔══██╗╚══██╔══╝██╔════╝██║  ██║
-███████║██║██████╔╝█████╗  ██╔████╔██║███████║   ██║   ██║     ███████║
-██╔══██║██║██╔══██╗██╔══╝  ██║╚██╔╝██║██╔══██║   ██║   ██║     ██╔══██║
-██║  ██║██║██║  ██║███████╗██║ ╚═╝ ██║██║  ██║   ██║   ╚██████╗██║  ██║
-╚═╝  ╚═╝╚═╝╚═╝  ╚═╝╚══════╝╚═╝     ╚═╝╚═╝  ╚═╝   ╚═╝    ╚═════╝╚═╝  ╚═╝
-                                                                        .AI
-```
+# 🎯 HireMatch.AI
 
-> know exactly why you're not getting interviews.
+Transform your job hunt with AI-powered application screening — paste any job description, upload your resume, and instantly see your match score, missing keywords, skill gaps, and get a tailored cover letter. HireMatch.AI helps you understand exactly why you're not getting interviews and gives you the tools to fix it, leveraging Google Gemini's AI capabilities.
 
-**[→ try it live](https://hirematch-ai.vercel.app)**
+![Status](https://img.shields.io/badge/status-live-success) ![License](https://img.shields.io/badge/license-MIT-blue) ![Tech](https://img.shields.io/badge/tech-fullstack-purple) ![AI](https://img.shields.io/badge/AI-Gemini%202.0-orange)
+
+**🚀 Live Demo:** [hirematch-ai.vercel.app](https://hirematch-ai.vercel.app)
 
 ---
 
-### the gist
+## ✨ Features
 
-paste a job description. drop your resume. get scored.
+- 🎯 **AI Match Scoring**: Get an instant 0–100% match score between your resume and any job description using Google Gemini
+- 🔍 **Keyword Gap Analysis**: See exactly which keywords from the JD are missing from your resume — the same ones ATS systems filter on
+- 📊 **Skill Alignment Bars**: Visual breakdown of how well each skill category aligns, with specific notes on each
+- ✍️ **Resume Bullet Rewriter**: Paste any bullet from your resume and get an ATS-optimised rewrite tailored to that specific job
+- 📝 **Cover Letter Generator**: Generates a full tailored cover letter referencing both your resume details and the JD requirements
+- 📁 **Application Tracker**: Saves every analysis to your personal dashboard — track status from Applied → Interviewing → Offered
+- ⚡ **Job Search Intelligence**: Surface patterns across all your applications — recurring missing keywords, average match score, interview conversion rate, and more
+- 🔐 **Secure Authentication**: Full email/password auth via Supabase with Row Level Security ensuring users only access their own data
 
-- match score (0–100%)
-- missing keywords
-- skill gap bars
-- bullet point rewriter
-- tailored cover letter
-- every application tracked
-- patterns across applications → which keywords keep blocking you
+## 🛠 Tech Stack
 
----
+- **Frontend:** HTML5, CSS3, Vanilla JavaScript
+- **AI Engine:** Google Gemini 2.0 Flash
+- **Backend:** Vercel Serverless Functions (Node.js)
+- **Database:** Supabase PostgreSQL
+- **Authentication:** Supabase Auth (Email/Password)
+- **PDF Parsing:** PDF.js
+- **Deployment:** Vercel (auto-deploy from GitHub)
 
-### built with
+## 📋 Prerequisites
 
-`gemini 2.0 flash` · `supabase` · `vercel` · `vanilla js` · `no framework noise`
+Before you begin, make sure you have the following ready:
 
----
+- A **GitHub** account
+- A **Vercel** account ([vercel.com](https://vercel.com))
+- A **Supabase** account ([supabase.com](https://supabase.com))
+- A **Google AI Studio** account for Gemini API ([aistudio.google.com](https://aistudio.google.com))
+- A modern web browser (Chrome, Edge, Firefox, Safari)
 
-### run it yourself
+## ⚙️ Installation
+
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/Nion9/hirematch-ai.git
+cd hirematch-ai
 ```
 
-1. spin up a supabase project · run `supabase-setup.sql`
-2. grab a free gemini key at [aistudio.google.com](https://aistudio.google.com)
-3. drop credentials into the html files
-4. push to vercel · add `GEMINI_API_KEY` env var
-5. ship
+### 2. Set Up Supabase
+
+Create a new project at [supabase.com](https://supabase.com), then:
+
+```sql
+-- Open SQL Editor and run the schema
+-- File: supabase-setup.sql
+```
+
+Copy your **Project URL** and **anon public key** from `Settings → API Keys`.
+
+### 3. Configure Credentials
+
+Open `index.html`, `app.html`, and `tracker.html`, then replace:
+
+```javascript
+const SUPABASE_URL = 'https://your-project.supabase.co';
+const SUPABASE_ANON_KEY = 'your-anon-key';
+```
+
+### 4. Get a Gemini API Key
+
+1. Go to [aistudio.google.com](https://aistudio.google.com)
+2. Click **Get API Key** → **Create API Key**
+3. Copy the key (starts with `AIza...`)
+
+### 5. Deploy to Vercel
+
+```bash
+git push origin main
+```
+
+Then on Vercel:
+
+1. Import your GitHub repository
+2. Go to **Settings → Environment Variables**
+3. Add: `GEMINI_API_KEY = your-gemini-key`
+4. Redeploy
+
+## 🚀 Usage
+
+### Running the Application
+
+Once deployed, your app is live at `https://your-project.vercel.app`.
+
+1. **Sign up** with your email and password
+2. **Confirm** your email (check inbox)
+3. **Sign in** to access the analyser
+
+### Analysing an Application
+
+1. Navigate to the **Analyser** page
+2. Paste the full **job description** in the left panel
+3. Upload your **resume** (PDF or TXT) or paste the text
+4. Click **Analyse My Application**
+5. Review your **match score**, **keyword gaps**, and **improvement suggestions**
+6. Use the **Resume Rewriter** to optimise specific bullets for this job
+7. Copy the **AI-generated cover letter**
+8. Update the **application status** as you progress (Analysed → Applied → Interviewing → Offered)
+
+### Viewing Your Intelligence Dashboard
+
+Navigate to **My Applications** to see:
+
+- Total applications analysed
+- Average match score across all roles
+- Interview conversion rate
+- Recurring missing keywords (which skills to focus on learning)
+- Patterns in your job search
+
+## 📁 Project Structure
+
+```
+hirematch-ai/
+├── api/
+│   └── analyze.js          # Vercel serverless function → Gemini API proxy
+├── index.html              # Authentication page (sign in / sign up)
+├── app.html                # Main analyser interface
+├── tracker.html            # Application tracker dashboard
+├── supabase-setup.sql      # Database schema (run once in Supabase)
+└── README.md
+```
+
+## 🔐 Security
+
+- **Row Level Security (RLS)** policies in Supabase ensure users only access their own data
+- **Gemini API key** stored as a Vercel environment variable — never exposed to the client
+- **Supabase anon key** is designed for frontend use; security is enforced at the database layer
+- **PDF parsing** happens entirely in the browser — your resume never leaves your device until analysed
+
+## 🗺 Roadmap
+
+- [ ] Chrome extension — analyse jobs directly on LinkedIn and Seek
+- [ ] Resume score history graph over time
+- [ ] Bulk apply mode — match one resume against multiple JDs at once
+- [ ] Interview question generator based on resume + JD gaps
+- [ ] Multi-language support
+- [ ] Mobile app (React Native)
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a pull request or open an issue for any bugs or feature requests.
+
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is open source and available under the [MIT License](LICENSE).
+
+## 👤 Author
+
+**Minhajul Islam Nion**
+
+- GitHub: [@Nion9](https://github.com/Nion9)
+- LinkedIn: [Nion007](https://linkedin.com/in/Nion007)
+- Email: minhajulislamnion@gmail.com
 
 ---
 
-### why
-
-i got rejected too many times without ever knowing why.
-
-so i built the thing that tells you.
-
----
-
-```
-made by @Nion9 · canberra, au
-```
+⭐ **If this project helped you land an interview, please star the repo!**
