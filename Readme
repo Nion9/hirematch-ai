@@ -1,0 +1,76 @@
+# HireMatch.AI
+
+> Know exactly why you're not getting interviews.
+
+HireMatch.AI is an AI-powered job application screener that analyses your resume against any job description, scores your match, identifies keyword gaps, rewrites your bullet points, generates a tailored cover letter, and tracks every application in one dashboard.
+
+## 🚀 Live Demo
+**[hirematch-ai.vercel.app](https://hirematch-ai.vercel.app)**
+
+## ✨ Features
+
+- **Match Score** — AI scores your resume against the job description (0–100%)
+- **Keyword Gap Analysis** — See exactly which keywords are missing from your resume
+- **Skill Alignment** — Visual bars showing how well each skill area matches
+- **Resume Rewriter** — Paste any bullet point, get an ATS-optimised rewrite for that specific job
+- **Cover Letter Generator** — AI-generated cover letter tailored to the role
+- **Application Tracker** — Every analysis saved to your personal dashboard
+- **Job Search Intelligence** — Patterns across all your applications: which keywords keep blocking you, your interview conversion rate, and more
+
+## 🛠 Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Frontend | HTML, CSS, JavaScript |
+| AI | Google Gemini 2.0 Flash API |
+| Backend | Vercel Serverless Functions |
+| Database & Auth | Supabase (PostgreSQL + Row Level Security) |
+| Deployment | Vercel |
+
+## 📁 Project Structure
+
+```
+hirematch-ai/
+├── api/
+│   └── analyze.js      # Serverless function — Gemini API proxy
+├── index.html          # Auth page (sign in / sign up)
+├── app.html            # Main analyser
+└── tracker.html        # Application tracker dashboard
+```
+
+## ⚙️ Setup
+
+### 1. Supabase
+1. Create a project at [supabase.com](https://supabase.com)
+2. Run the schema from `supabase-setup.sql` in the SQL Editor
+3. Copy your **Project URL** and **anon public key**
+
+### 2. Gemini API
+1. Get a free API key at [aistudio.google.com](https://aistudio.google.com)
+
+### 3. Environment Variables (Vercel)
+```
+GEMINI_API_KEY=your-gemini-api-key
+```
+
+Add your Supabase credentials directly in the HTML files:
+```js
+const SUPABASE_URL = 'your-project-url';
+const SUPABASE_ANON_KEY = 'your-anon-key';
+```
+
+### 4. Deploy
+```bash
+# Push to GitHub → Vercel auto-deploys
+git push origin main
+```
+
+## 👤 Built By
+
+**Minhajul Islam Nion**  
+Founder @ BrainBoxe | AI/ML Researcher  
+[github.com/Nion9](https://github.com/Nion9) · [linkedin.com/in/Nion007](https://linkedin.com/in/Nion007)
+
+---
+
+*Built to solve a real problem — after getting rejected too many times without knowing why.*
