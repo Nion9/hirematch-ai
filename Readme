@@ -1,76 +1,144 @@
+<div align="center">
+
+<img src="https://img.shields.io/badge/HireMatch.AI-Live-7c6fff?style=for-the-badge&logo=vercel&logoColor=white" alt="Live"/>
+
 # HireMatch.AI
 
-> Know exactly why you're not getting interviews.
+### Know exactly why you're not getting interviews.
 
-HireMatch.AI is an AI-powered job application screener that analyses your resume against any job description, scores your match, identifies keyword gaps, rewrites your bullet points, generates a tailored cover letter, and tracks every application in one dashboard.
+AI-powered resume screener that scores your match, finds keyword gaps, rewrites your bullets, generates cover letters, and tracks every application — all in one place.
 
-## 🚀 Live Demo
-**[hirematch-ai.vercel.app](https://hirematch-ai.vercel.app)**
+[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-hirematch--ai.vercel.app-7c6fff?style=for-the-badge)](https://hirematch-ai.vercel.app)
+[![Made with Gemini](https://img.shields.io/badge/Gemini_2.0_Flash-AI_Powered-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://aistudio.google.com)
+[![Supabase](https://img.shields.io/badge/Supabase-Database_&_Auth-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)](https://supabase.com)
+[![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com)
+
+</div>
+
+---
+
+## 🎯 The Problem
+
+You apply to 50 jobs. You hear back from 3. You don't know why.
+
+Most applicants never find out that ATS systems filter them out before a human even reads their resume — because of missing keywords, misaligned skills, or a cover letter that wasn't tailored.
+
+**HireMatch.AI fixes that.**
+
+---
 
 ## ✨ Features
 
-- **Match Score** — AI scores your resume against the job description (0–100%)
-- **Keyword Gap Analysis** — See exactly which keywords are missing from your resume
-- **Skill Alignment** — Visual bars showing how well each skill area matches
-- **Resume Rewriter** — Paste any bullet point, get an ATS-optimised rewrite for that specific job
-- **Cover Letter Generator** — AI-generated cover letter tailored to the role
-- **Application Tracker** — Every analysis saved to your personal dashboard
-- **Job Search Intelligence** — Patterns across all your applications: which keywords keep blocking you, your interview conversion rate, and more
+| Feature | What it does |
+|---|---|
+| 🎯 **Match Score** | Scores your resume vs job description (0–100%) with animated visual |
+| 🔍 **Keyword Gap Analysis** | Shows exactly which keywords are in your resume vs missing |
+| 📊 **Skill Alignment** | Visual bars showing match strength per skill category |
+| ✍️ **Resume Rewriter** | Paste any bullet point → get an ATS-optimised rewrite for that specific job |
+| 📝 **Cover Letter Generator** | Full tailored cover letter referencing both your resume and the JD |
+| 📁 **Application Tracker** | Every analysis saved — track status from Applied → Offered |
+| ⚡ **Job Search Intelligence** | Patterns across all applications: which keywords keep blocking you, interview conversion rate, and more |
+
+---
 
 ## 🛠 Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Frontend | HTML, CSS, JavaScript |
-| AI | Google Gemini 2.0 Flash API |
-| Backend | Vercel Serverless Functions |
-| Database & Auth | Supabase (PostgreSQL + Row Level Security) |
-| Deployment | Vercel |
+```
+Frontend      →  HTML + CSS + Vanilla JavaScript
+AI Engine     →  Google Gemini 2.0 Flash (free tier)
+Backend       →  Vercel Serverless Functions (Node.js)
+Database      →  Supabase PostgreSQL
+Auth          →  Supabase Auth (email/password)
+PDF Parsing   →  PDF.js
+Deployment    →  Vercel (auto-deploy from GitHub)
+```
+
+---
 
 ## 📁 Project Structure
 
 ```
 hirematch-ai/
 ├── api/
-│   └── analyze.js      # Serverless function — Gemini API proxy
-├── index.html          # Auth page (sign in / sign up)
-├── app.html            # Main analyser
-└── tracker.html        # Application tracker dashboard
+│   └── analyze.js        # Serverless proxy → Gemini API
+├── index.html            # Auth (sign in / sign up)
+├── app.html              # Main analyser
+├── tracker.html          # Application tracker dashboard
+└── README.md
 ```
 
-## ⚙️ Setup
+---
 
-### 1. Supabase
+## ⚙️ Local Setup
+
+### 1. Clone the repo
+```bash
+git clone https://github.com/Nion9/hirematch-ai.git
+cd hirematch-ai
+```
+
+### 2. Set up Supabase
 1. Create a project at [supabase.com](https://supabase.com)
-2. Run the schema from `supabase-setup.sql` in the SQL Editor
+2. Run `supabase-setup.sql` in the SQL Editor
 3. Copy your **Project URL** and **anon public key**
-
-### 2. Gemini API
-1. Get a free API key at [aistudio.google.com](https://aistudio.google.com)
-
-### 3. Environment Variables (Vercel)
-```
-GEMINI_API_KEY=your-gemini-api-key
-```
-
-Add your Supabase credentials directly in the HTML files:
+4. Add them to `index.html`, `app.html`, and `tracker.html`:
 ```js
 const SUPABASE_URL = 'your-project-url';
 const SUPABASE_ANON_KEY = 'your-anon-key';
 ```
 
-### 4. Deploy
-```bash
-# Push to GitHub → Vercel auto-deploys
-git push origin main
+### 3. Get a Gemini API Key (free)
+1. Go to [aistudio.google.com](https://aistudio.google.com)
+2. Click **Get API Key** → **Create API Key**
+
+### 4. Deploy to Vercel
+1. Push to GitHub
+2. Import repo at [vercel.com](https://vercel.com)
+3. Add environment variable:
 ```
-
-## 👤 Built By
-
-**Minhajul Islam Nion**  
-Founder @ BrainBoxe | AI/ML Researcher  
-[github.com/Nion9](https://github.com/Nion9) · [linkedin.com/in/Nion007](https://linkedin.com/in/Nion007)
+GEMINI_API_KEY = your-gemini-api-key
+```
+4. Deploy — done ✅
 
 ---
 
+## 🔐 Security
+
+- Supabase **Row Level Security (RLS)** ensures users only access their own data
+- Gemini API key stored as Vercel environment variable — never exposed to client
+- Supabase anon key is safe for frontend use by design
+
+---
+
+## 🗺 Roadmap
+
+- [ ] Chrome extension — analyse jobs directly on LinkedIn/Seek
+- [ ] Resume score history graph over time
+- [ ] Bulk apply mode — match one resume against multiple JDs at once
+- [ ] Interview question generator based on job + resume gaps
+- [ ] Mobile app (React Native)
+
+---
+
+## 👤 Built By
+
+<div align="center">
+
+**Minhajul Islam Nion**
+
+*Founder @ BrainBoxe · AI/ML Researcher · Full-Stack Developer*
+
+[![GitHub](https://img.shields.io/badge/GitHub-Nion9-181717?style=flat-square&logo=github)](https://github.com/Nion9)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Nion007-0A66C2?style=flat-square&logo=linkedin)](https://linkedin.com/in/Nion007)
+
 *Built to solve a real problem — after getting rejected too many times without knowing why.*
+
+</div>
+
+---
+
+<div align="center">
+
+⭐ **Star this repo if it helped you land an interview!**
+
+</div>
