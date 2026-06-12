@@ -420,9 +420,11 @@ Rules: strengths 5-8 items, missing 5-8 items, skills 4-6 items, improvements 4-
     const data = await res.json();
     clearInterval(iv);
     if (!res.ok) throw new Error(data.error || 'API error');
-    const raw = data.text.trim();
+    let raw = (data.text || '').trim();
+    // Strip markdown code fences if Gemini wraps the JSON
+    raw = raw.replace(/```json/gi, '').replace(/```/g, '').trim();
     const match = raw.match(/\{[\s\S]*\}/);
-    if (!match) throw new Error('Could not parse response');
+    if (!match) throw new Error('AI returned an unexpected format — please try again');
     const result = JSON.parse(match[0]);
     currentResult = result;
 
